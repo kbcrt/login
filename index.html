@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>输入验证码验证界面</title>
+	<style>
+		body {
+			background-color: #f2f2f2;
+			font-family: Arial, sans-serif;
+		}
+		h1 {
+			text-align: center;
+			margin-top: 50px;
+			color: #333;
+		}
+		.container {
+			background-color: #fff;
+			max-width: 500px;
+			margin: 0 auto;
+			padding: 30px;
+			border-radius: 10px;
+			margin-top: 50px;
+			box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);
+		}
+		form {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+		}
+		.input-box {
+			margin-top: 20px;
+			position: relative;
+		}
+		.input-box input[type="text"] {
+			padding: 10px 20px 10px 40px;
+			border: none;
+			border-radius: 25px;
+			background-color: #eee;
+			font-size: 16px;
+			width: 250px;
+			color: #333;
+			box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+		}
+		.input-box i {
+			position: absolute;
+			top: 12px;
+			left: 12px;
+			color: #888;
+			font-size: 20px;
+		}
+		.captcha-box {
+			margin-top: 20px;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+		}
+		canvas {
+			background-color: #fff;
+			border-radius: 5px;
+			box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+			cursor: pointer;
+		}
+		button[type="submit"] {
+			margin-top: 20px;
+			padding: 10px 20px;
+			border: none;
+			border-radius: 25px;
+			background-color: #3f88de;
+			font-size: 16px;
+			color: #fff;
+			cursor: pointer;
+			box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+		}
+		button[type="submit"]:hover {
+			background-color: #1f5fa9;
+		}
+	</style>
+</head>
+<body>
+	<h1>输入验证码以继续</h1>
+	<div class="container">
+		<form>
+			<div class="input-box">
+				<input type="text" placeholder="在此输入验证码" name="captcha" required>
+				<i class="fas fa-lock"></i>
+			</div>
+
+			<button type="submit">验证</button>
+
+			<div class="captcha-box">
+				<canvas id="captcha" width="120" height="50"></canvas>
+				<a href="#" onclick="changeCaptcha()">看不清？换一个</a>
+			</div>
+		</form>
+	</div>
+
+	<script>
+		const canvas = document.getElementById('captcha');
+		const ctx = canvas.getContext('2d');
+		const form = document.querySelector('form');
+		const captcha = document.querySelector('[name="captcha"]');
+		const captchaLink = document.querySelector('.captcha-box a');
+
+		function drawCaptcha(code) {
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+			// Draw noise dots
+			for (let i = 0; i < 50; i++) {
+				let x = Math.random() * canvas.width;
+				let y = Math.random() * canvas.height;
+				ctx.fillStyle = '#000';
+				ctx.fillRect(x, y, 1, 1);
+			}
+
+			// Draw text
+			ctx.fillStyle = '#000';
+			ctx.font = '36px Arial';
+			ctx.textBaseline = 'middle';
+			ctx.textAlign = 'center';
+			ctx.fillText(code, canvas.width / 2, canvas.height / 2);
+		}
+
+		function changeCaptcha() {
+			captchaLink.innerHTML = '正在加载...';
+			const xhr = new XMLHttpRequest();
+			xhr.open('GET', 'captcha.png');
+			xhr.responseType = 'blob';
+			xhr.onload = () => {
+				const url = URL.createObjectURL(xhr.response);
+				const img = new Image();
+				img.onload = () => {
+					drawCaptcha(captcha.value);
+					URL.revokeObjectURL(url);
+					captchaLink.innerHTML = '看不清？换一个';
+				};
+				img.src = url;
+			};
+			xhr.send();
+		}
+
+		form.addEventListener('submit', function(e) {
+			e.preventDefault();
+
+			if (captcha.value != "") {
+				const xhr = new XMLHttpRequest();
+				xhr.open('POST', 'validate.php');
+				xhr.onload = () => {
+					if (xhr.responseText == 'success') {
+						window.location.replace('http://www.baidu.com');
+					} else {
+						alert('验证码错误，请重试！');
+						changeCaptcha();
+					}
+				};
+				xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+				xhr.send('captcha=' + captcha.value);
+			};
+		});
+
+		changeCaptcha();
+	</script>
+</body>
+</html>
