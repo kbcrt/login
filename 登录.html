@@ -1,18 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>验证界面</title>
+	<title>复杂登录界面</title>
 	<link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-	<div class="container">
-		<h1>输入验证码以继续</h1>
+	<div class="login-box">
+		<h1>Login</h1>
 		<form>
-			<div class="input-box">
-				<input type="text" placeholder="在此输入验证码" name="captcha" required>
+			<div class="textbox">
+				<input type="text" placeholder="Username" name="username" required>
 			</div>
 
-			<button type="submit" class="btn">提交</button>
+			<div class="textbox">
+				<input type="password" placeholder="Password" name="password" required>
+			</div>
+
+			<div class="captcha-box">
+				<img src="captcha.php" alt="Captcha">
+				<input type="text" name="captcha" placeholder="Enter Captcha" required>
+			</div>
+
+			<input class="btn" type="submit" value="Sign in">
 		</form>
 	</div>
 
